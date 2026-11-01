@@ -1,5 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A Shift 2027 Draft Board</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#081321;color:#f4f7fc;font:15px system-ui,Arial}header{padding:22px 15px;text-align:center;background:#0d1c30;border-bottom:4px solid #f5bd45}small,.muted{color:#aebed0}header small{color:#f5bd45;letter-spacing:3px;font-weight:800}h1{margin:6px 0;font-size:clamp(25px,5vw,39px)}main{max-width:1100px;margin:auto;padding:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.panel{background:#15273d;border:1px solid #314861;border-radius:12px;padding:14px;margin-bottom:12px}.stats .panel{min-width:0}.value{font-size:clamp(17px,3vw,26px);font-weight:800;color:#f5bd45;overflow-wrap:anywhere}.label{font-size:11px;color:#b7c5d6;text-transform:uppercase;letter-spacing:1px}button{padding:10px 14px;border:1px solid #60738a;background:#29425e;border-radius:9px;color:white;font-weight:700;cursor:pointer}button:disabled{opacity:.4}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;text-align:left;border-bottom:1px solid #334a60}tr.current{background:#304560}h2{font-size:20px;margin:0 0 12px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.day{min-height:82px;border:1px solid #3d546b;background:#1c3148;border-radius:7px;padding:6px;overflow-wrap:anywhere}.day.a{border-color:#e8b34a;background:#34402d}.day.other{opacity:.6}.day .date{font-weight:800}.day .shift{font-size:10px;color:#c2d0de}.pick{margin-top:3px;font-size:10px;font-weight:750;background:#f5bd45;color:#152337;padding:2px;border-radius:3px}.pick.k{background:#76dcb4}.dow{text-align:center;font-size:11px;color:#b4c6d8;padding:4px}.error{color:#ff9999}#notice{margin:8px 0}@media(max-width:600px){.day{min-height:70px;padding:3px}.pick{font-size:9px}.stats .panel{padding:10px}.stats{gap:5px}}</style></head><body><header><small>YAUFR • A SHIFT • 2027</small><h1>🏈 VACATION DRAFT HQ 🚒</h1><div class="muted">LIVE VIEWING BOARD • Selections are not yet enabled</div></header><main><section class="stats"><div class="panel"><div class="label">On the clock</div><div class="value" id="picker">Loading…</div></div><div class="panel"><div class="label">Round</div><div class="value" id="round">—</div></div><div class="panel"><div class="label">Draft clock</div><div class="value" id="clock">00:00</div></div></section><div class="panel"><div id="notice" class="muted">Connecting to shared draft database…</div><div class="muted" style="font-size:12px">Read-only preview: picks and administrator controls remain locked until secure submission is installed. This page refreshes from the database every 10 seconds.</div></div><div class="panel"><h2>Draft board</h2><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Firefighter</th><th>Vacation</th><th>V picked</th><th>K picked</th></tr></thead><tbody id="board"></tbody></table></div></div><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><button id="prev">◀ Prev</button><div style="text-align:center"><h2 id="period" style="margin:0">Calendar</h2><div class="muted" id="required"></div></div><button id="next">Next ▶</button></div><div class="calendar" id="calendar" style="margin-top:14px"></div></div></main><script>
-const BASE='https://xhljvicefbxklfbahdby.supabase.co',KEY='sb_publishable_bFun1NtC3uqgXZrTZcSJ8w_MkhVtB31';let people=[],picks=[],state={},page=0;const $=id=>document.getElementById(id);const dayms=86400000;const start=Date.UTC(2026,11,19);const dateISO=d=>new Date(d).toISOString().slice(0,10);const fmt=d=>new Date(d).toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'});function shift(d){const n=Math.round((d-Date.UTC(2026,11,20))/dayms);return ['A','B','C'][((Math.floor(n/1)%3)+3)%3]}function shift2(d){const n=Math.round((d-Date.UTC(2026,11,20))/dayms);return ['A','B','C'][((n%3)+3)%3]}function render(){const current=people.find(p=>p.id===state.current_firefighter_id);$('picker').textContent=current?.last_name||'Not started';$('round').textContent=state.round_number||'—';$('board').innerHTML=people.map(p=>{const mine=picks.filter(x=>x.firefighter_id===p.id);return `<tr class="${p.id===state.current_firefighter_id?'current':''}"><td>${p.id}</td><td>${p.last_name}</td><td>${p.vacation_base+p.vacation_added}</td><td>${mine.filter(x=>x.leave_type==='V').length}</td><td>${mine.filter(x=>x.leave_type==='K').length}</td></tr>`}).join('');const from=start+page*28*dayms,to=from+27*dayms;$('period').textContent=`Period ${page+1} / 14`;$('required').textContent=`${fmt(from)} – ${fmt(to)} · ${[2,5,8,11].includes(page+1)?'Required A-shift Kelly period':page+1===14?'Optional this year · required second half next year if skipped':'Optional Kelly period'}`;let html=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="dow">${x}</div>`).join('');const first=new Date(from).getUTCDay();for(let i=0;i<first;i++)html+='<div></div>';for(let i=0;i<28;i++){let d=from+i*dayms,iso=dateISO(d),s=shift2(d),these=picks.filter(x=>x.leave_date===iso);html+=`<div class="day ${s==='A'?'a':'other'}"><div class="date">${new Date(d).getUTCDate()}</div><div class="shift">${s} SHIFT</div>${these.map(x=>`<div class="pick ${x.leave_type==='K'?'k':''}">${x.leave_type} ${people.find(p=>p.id===x.firefighter_id)?.last_name||'?'}</div>`).join('')}</div>`}$('calendar').innerHTML=html;$('prev').disabled=page===0;$('next').disabled=page===13;tick()}function tick(){if(!state.turn_started_at||state.status!=='active'){$('clock').textContent='00:00';return}let secs=Math.max(0,Math.floor((Date.now()-Date.parse(state.turn_started_at))/1000));$('clock').textContent=`${String(Math.floor(secs/60)).padStart(2,'0')}:${String(secs%60).padStart(2,'0')}`}async function get(table,order){const r=await fetch(`${BASE}/rest/v1/${table}?select=*${order?'&order='+order:''}`,{headers:{apikey:KEY}});if(!r.ok)throw Error(`${table}: ${r.status} ${await r.text()}`);return r.json()}async function refresh(){try{const [a,b,c]=await Promise.all([get('draft_firefighters','id.asc'),get('draft_state'),get('draft_selections','id.asc')]);people=a;state=b[0]||{};picks=c;$('notice').className='muted';$('notice').textContent=`● Connected · ${state.status||'setup'} · ${picks.length} selections · last checked ${new Date().toLocaleTimeString()}`;render()}catch(e){$('notice').className='error';$('notice').textContent=`Unable to read Supabase: ${e.message}`;console.error(e)}}$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};setInterval(tick,1000);setInterval(refresh,10000);refresh();
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A Shift 2027 Draft Board</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#081321;color:#f4f7fc;font:15px system-ui,Arial}header{padding:22px 15px;text-align:center;background:#0d1c30;border-bottom:4px solid #f5bd45}small,.muted{color:#aebed0}header small{color:#f5bd45;letter-spacing:3px;font-weight:800}h1{margin:6px 0;font-size:clamp(25px,5vw,39px)}main{max-width:1100px;margin:auto;padding:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.panel{background:#15273d;border:1px solid #314861;border-radius:12px;padding:14px;margin-bottom:12px}.stats .panel{min-width:0}.value{font-size:clamp(17px,3vw,26px);font-weight:800;color:#f5bd45;overflow-wrap:anywhere}.label{font-size:11px;color:#b7c5d6;text-transform:uppercase;letter-spacing:1px}button{padding:10px 14px;border:1px solid #60738a;background:#29425e;border-radius:9px;color:white;font-weight:700;cursor:pointer}button:disabled{opacity:.4}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;text-align:left;border-bottom:1px solid #334a60}tr.current{background:#304560}h2{font-size:20px;margin:0 0 12px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.day{min-height:82px;border:1px solid #3d546b;background:#1c3148;border-radius:7px;padding:6px;overflow-wrap:anywhere}.day.a{border-color:#e8b34a;background:#34402d}.day.other{opacity:.6}.day .date{font-weight:800}.day .shift{font-size:10px;color:#c2d0de}.pick{margin-top:3px;font-size:10px;font-weight:750;background:#f5bd45;color:#152337;padding:2px;border-radius:3px}.pick.k{background:#76dcb4}.dow{text-align:center;font-size:11px;color:#b4c6d8;padding:4px}.error{color:#ff9999}#notice{margin:8px 0}@media(max-width:600px){.day{min-height:70px;padding:3px}.pick{font-size:9px}.stats .panel{padding:10px}.stats{gap:5px}}</style></head><body><header><small>YAUFR • A SHIFT • 2027</small><h1>🏈 VACATION DRAFT HQ 🚒</h1><div class="muted">LIVE DRAFT BOARD • Picks open when the draft starts</div></header><main><section class="stats"><div class="panel"><div class="label">On the clock</div><div class="value" id="picker">Loading…</div></div><div class="panel"><div class="label">Round</div><div class="value" id="round">—</div></div><div class="panel"><div class="label">Draft clock</div><div class="value" id="clock">00:00</div></div></section><div class="panel"><div id="notice" class="muted">Connecting to shared draft database…</div><div class="muted" style="font-size:12px">Draft selections are available only on the current firefighter’s turn when the administrator starts the draft. This page refreshes from the database every 10 seconds.</div></div><div class="panel"><h2>Draft board</h2><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Firefighter</th><th>Vacation</th><th>V picked</th><th>K picked</th></tr></thead><tbody id="board"></tbody></table></div></div><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><button id="prev">◀ Prev</button><div style="text-align:center"><h2 id="period" style="margin:0">Calendar</h2><div class="muted" id="required"></div></div><button id="next">Next ▶</button></div><div class="calendar" id="calendar" style="margin-top:14px"></div></div></main><script>
+const BASE='https://xhljvicefbxklfbahdby.supabase.co',KEY='sb_publishable_bFun1NtC3uqgXZrTZcSJ8w_MkhVtB31';let people=[],picks=[],state={},page=0;const $=id=>document.getElementById(id);const dayms=86400000;const start=Date.UTC(2026,11,19);let sessionToken=null, signedInId=null, selectedDates=new Set();const dateISO=d=>new Date(d).toISOString().slice(0,10);const fmt=d=>new Date(d).toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'});function shift(d){const n=Math.round((d-Date.UTC(2026,11,20))/dayms);return ['A','B','C'][((Math.floor(n/1)%3)+3)%3]}function shift2(d){const n=Math.round((d-Date.UTC(2026,11,20))/dayms);return ['A','B','C'][((n%3)+3)%3]}function render(){if(typeof updateAdminPanel==='function')updateAdminPanel();const current=people.find(p=>p.id===state.current_firefighter_id);$('picker').textContent=current?.last_name||'Not started';$('round').textContent=state.round_number||'—';$('board').innerHTML=people.map(p=>{const mine=picks.filter(x=>x.firefighter_id===p.id);return `<tr class="${p.id===state.current_firefighter_id?'current':''}"><td>${p.id}</td><td>${p.last_name}</td><td>${p.vacation_base+p.vacation_added}</td><td>${mine.filter(x=>x.leave_type==='V').length}</td><td>${mine.filter(x=>x.leave_type==='K').length}</td></tr>`}).join('');const from=start+page*28*dayms,to=from+27*dayms;$('period').textContent=`Period ${page+1} / 14`;$('required').textContent=`${fmt(from)} – ${fmt(to)} · ${[2,5,8,11].includes(page+1)?'Required Kelly period':page+1===14?'Optional Kelly period (2027 dates only)':'Optional Kelly period'}`;let html=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="dow">${x}</div>`).join('');const first=new Date(from).getUTCDay();for(let i=0;i<first;i++)html+='<div></div>';for(let i=0;i<28;i++){let d=from+i*dayms,iso=dateISO(d),s=shift2(d),these=picks.filter(x=>x.leave_date===iso);html+=`<div class="day ${s==='A'?'a':'other'} ${selectedDates.has(iso)?'selected':''}" data-date="${iso}"><div class="date">${new Date(d).getUTCDate()}</div><div class="shift">${s} SHIFT</div>${these.map(x=>`<div class="pick ${x.leave_type==='K'?'k':''}">${x.leave_type} ${people.find(p=>p.id===x.firefighter_id)?.last_name||'?'}</div>`).join('')}</div>`}$('calendar').innerHTML=html;updatePickPanel();$('prev').disabled=page===0;$('next').disabled=page===13;tick()}function tick(){if(!state.turn_started_at||state.status!=='active'){$('clock').textContent='00:00';return}let secs=Math.max(0,Math.floor((Date.now()-Date.parse(state.turn_started_at))/1000));$('clock').textContent=`${String(Math.floor(secs/60)).padStart(2,'0')}:${String(secs%60).padStart(2,'0')}`}async function get(table,order){const r=await fetch(`${BASE}/rest/v1/${table}?select=*${order?'&order='+order:''}`,{headers:{apikey:KEY}});if(!r.ok)throw Error(`${table}: ${r.status} ${await r.text()}`);return r.json()}async function refresh(){try{const [a,b,c]=await Promise.all([get('draft_firefighters','id.asc'),get('draft_state'),get('draft_selections','id.asc')]);people=a;state=b[0]||{};picks=c;$('notice').className='muted';$('notice').textContent=`● Connected · ${state.status||'setup'} · ${picks.length} selections · last checked ${new Date().toLocaleTimeString()}`;render()}catch(e){$('notice').className='error';$('notice').textContent=`Unable to read Supabase: ${e.message}`;console.error(e)}}$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};setInterval(tick,1000);setInterval(refresh,10000);refresh();
 </script>
 <style>
 #firefighter-login {
@@ -36,7 +36,7 @@ const BASE='https://xhljvicefbxklfbahdby.supabase.co',KEY='sb_publishable_bFun1N
 
 <section id="firefighter-login">
   <h2>🔐 Firefighter Sign In</h2>
-  <p>Sign-in testing only. Official picks are disabled.</p>
+  <p>Sign in with your private code. Picks are only available during your turn.</p>
 
   <form id="firefighter-login-form">
     <label for="login-name">Firefighter</label>
@@ -112,11 +112,7 @@ const BASE='https://xhljvicefbxklfbahdby.supabase.co',KEY='sb_publishable_bFun1N
         if (!response.ok) throw new Error('Sign-in service error');
 
         if (Array.isArray(data) && data[0]?.session_token) {
-          sessionStorage.setItem('draft_test_token', data[0].session_token);
-          sessionStorage.setItem('draft_test_firefighter', select.value);
-          window.dispatchEvent(new Event('draft-test-login'));
-          result.textContent =
-            'Sign-in successful! You can preview your selections below.';
+          sessionToken=data[0].session_token; signedInId=Number(select.value); selectedDates.clear(); updatePickPanel(); render(); result.textContent='Signed in as '+select.options[select.selectedIndex].text+'.'; updateAdminPanel();
         } else {
           result.textContent =
             'Sign-in unsuccessful. Check your code or try again later.';
@@ -134,89 +130,166 @@ const BASE='https://xhljvicefbxklfbahdby.supabase.co',KEY='sb_publishable_bFun1N
 </script>
 
 <style>
-#draft-test{max-width:1100px;margin:16px auto;padding:20px;background:#15273d;border:1px solid #314861;border-radius:12px;font-family:system-ui,sans-serif;color:#f4f7fc}
-#draft-test h2{margin:0 0 10px}#draft-test .hint{color:#b7c5d6;line-height:1.5}
-#draft-test .selected-list{margin:10px 0;line-height:1.8;overflow-wrap:anywhere}
-#draft-test button{margin:5px 6px 5px 0}
-#draft-test #submit-test{background:#f5bd45;color:#081321}
-.day.a.selectable{cursor:pointer;outline:1px dashed #f5bd45;outline-offset:-5px}
-.day.a.chosen{background:#155f55;border:3px solid #76dcb4}
-.day.a.full{opacity:.65;cursor:not-allowed}
-#draft-test .warn{color:#ffd58a}#draft-test .ok{color:#76dcb4}
+.day.a.available{cursor:pointer}.day.selected{outline:3px solid #77e0a9;background:#235b4b}.day.unavailable{opacity:.48}.day .capacity{font-size:10px;color:#ffc56c}.draft-controls{max-width:1100px;margin:16px auto;padding:18px;background:#15273d;border:1px solid #314861;border-radius:12px;color:#fff;font-family:system-ui,sans-serif}.draft-controls button{background:#f5bd45;color:#09182a;padding:11px 17px;border:0;border-radius:8px;font-weight:bold;cursor:pointer}.draft-controls button:disabled{opacity:.45;cursor:not-allowed}.draft-controls .error{color:#ff9d9d}.draft-controls .good{color:#8ee5ae}
 </style>
-<section id="draft-test" aria-label="Test selection interface">
-  <h2>📅 Make Your Picks — Test Preview</h2>
-  <p class="hint">Sign in above, then tap highlighted A Shift dates in the calendar. Use Next and Prev to visit all 14 periods. This test page will <strong>not submit any official picks while the draft is in setup</strong>.</p>
-  <p id="test-identity" class="hint">Not signed in.</p>
-  <p id="test-instructions" class="hint">Sign in to begin selecting dates.</p>
-  <div class="selected-list" id="test-selected" aria-live="polite">No dates selected.</div>
-  <button id="test-clear" type="button">Clear Selections</button>
-  <button id="submit-test" type="button" disabled>Preview Only — Submission Disabled</button>
-  <p id="test-message" role="status" class="hint"></p>
+<section class="draft-controls" id="draft-controls">
+<h2>Make your selections</h2>
+<p id="pick-instructions">Sign in above to prepare your selections. Official submissions remain disabled while the draft is in setup.</p>
+<p id="pick-count">0 dates selected</p>
+<div id="pick-dates" class="muted"></div>
+<p><button id="clear-picks" type="button">Clear selections</button> <button id="submit-picks" type="button" disabled>Submit my turn</button></p>
+<p id="pick-feedback" role="status"></p>
+</section>
+<section class="draft-controls" id="admin-panel" hidden>
+<h2>🔒 A Shift Administrator — ECKERT</h2>
+<p>Only your signed-in account can request these actions. Supabase checks your administrator permission on every request.</p>
+<p><strong>Current draft status:</strong> <span id="admin-status">setup</span></p>
+<p><button id="admin-start" type="button" disabled>Start draft</button> <button id="admin-pause" type="button" disabled>Pause draft</button> <button id="admin-resume" type="button" disabled>Resume draft</button></p>
+<p id="admin-feedback" role="status"></p>
+<p class="muted">Starting the draft enables KEOUGH's Round 1 Kelly Day selections. Do not start until you are ready for the official draft.</p>
+</section>
+<section class="draft-controls" id="admin-corrections" hidden>
+<h2>🛠️ Administrator — Correct a Submitted Pick</h2>
+<p class="muted">Choose an existing selection, then change its date/type or remove it. Preview first. All corrections require a reason; rule-breaking changes require an additional override confirmation.</p>
+<div class="correction-grid">
+<label>Firefighter<br><select id="corr-firefighter"></select></label>
+<label>Existing selection<br><select id="corr-selection"></select></label>
+<label>Action<br><select id="corr-action"><option value="change">Change pick</option><option value="remove">Remove pick</option></select></label>
+<label id="corr-date-wrap">New date<br><input id="corr-date" type="date" min="2027-01-01" max="2027-12-31"></label>
+<label id="corr-type-wrap">Leave type<br><select id="corr-type"><option value="V">Vacation</option><option value="K">Kelly Day</option></select></label>
+</div>
+<label>Reason for change (required)<br><textarea id="corr-reason" rows="2" maxlength="500" placeholder="Approved change and reason"></textarea></label>
+<p><button type="button" id="corr-preview">Preview change</button> <button type="button" id="corr-save" disabled>Save approved change</button></p>
+<div id="corr-result" role="status" aria-live="polite"></div>
+<p class="muted">Override warnings never bypass the requirement to use a valid 2027 A Shift date or prevent duplicate leave for the same firefighter on one day. Changes are logged in Supabase.</p>
 </section>
 <script>
-(() => {
-  const chosen=new Set();
-  const $t=id=>document.getElementById(id);
-  const requiredPages=[2,5,8,11];
-  const getPerson=()=>people.find(p=>String(p.id)===sessionStorage.getItem('draft_test_firefighter'));
-  const loggedIn=()=>Boolean(sessionStorage.getItem('draft_test_token')&&getPerson());
-  const periodFor=iso=>Math.floor((Date.parse(iso+'T00:00:00Z')-start)/(28*dayms))+1;
-  const selectedDates=()=>[...chosen].sort();
-  const currentType=()=>state.round_number===1?'K':'V';
-  const datePicks=iso=>picks.filter(p=>p.leave_date===iso);
-  function updatePanel(){
-    const person=getPerson(), signed=loggedIn(), isTurn=signed&&person.id===state.current_firefighter_id;
-    const round=state.round_number||1;
-    $t('test-identity').textContent=signed?`Signed in as ${person.last_name} · Round ${round} · ${isTurn?'Your turn':'Waiting for your turn'}`:'Not signed in.';
-    $t('test-instructions').textContent=!signed?'Sign in above to select A Shift dates.':round===1?
-      'Round 1: Select exactly 9 Kelly Days in 9 different periods. Periods 2, 5, 8, and 11 are required. Period 14 is optional this year; skipping it creates an obligation to take a Kelly Day in the second half of that period next year.':
-      `Round ${round}: Choose vacation dates. Final limits and accrual rules are checked by the server.`;
-    const dates=selectedDates();
-    $t('test-selected').textContent=dates.length?`${dates.length} selected ${currentType()} day(s): ${dates.join(', ')}`:'No dates selected.';
-    $t('submit-test').disabled=true;
-    const validK=dates.length===9&&requiredPages.every(pg=>dates.some(d=>periodFor(d)===pg));
-    $t('test-message').textContent=round===1?(validK?(dates.some(d=>periodFor(d)===14)?'Nine Kelly Days selected. Period 14 included. Preview only; submission disabled.':'Nine Kelly Days selected. Period 14 skipped: next year, a Kelly Day is required in the second half of that period. Preview only; submission disabled.'):`${dates.length}/9 Kelly Days selected. Required periods: 2, 5, 8, 11. Preview only; submission disabled.`):'Vacation preview only. Submission disabled.';
-  }
-  function decorate(){
-    document.querySelectorAll('#calendar .day').forEach((el)=>{
-      const iso=el.dataset.iso;
-      if(!iso||!el.classList.contains('a'))return;
-      if(chosen.has(iso))el.classList.add('chosen');
-      if(datePicks(iso).length>=2)el.classList.add('full');
-      if(loggedIn()&&datePicks(iso).length<2)el.classList.add('selectable');
-      el.setAttribute('role','button');
-      el.setAttribute('tabindex',loggedIn()?'0':'-1');
-      el.setAttribute('aria-label',`${iso}, A Shift, ${datePicks(iso).length} already off`);
-      el.onclick=()=>toggle(iso);
-      el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(iso)}};
-    });
-    updatePanel();
-  }
-  function toggle(iso){
-    if(!loggedIn()){ $t('test-message').textContent='Please sign in first.';return; }
-    if(chosen.has(iso)){chosen.delete(iso);render();return;}
-    if(datePicks(iso).length>=2){$t('test-message').textContent='Two firefighters are already off on that date.';return;}
-    if(currentType()==='K'){
-      const pg=periodFor(iso);
-      if(selectedDates().some(d=>periodFor(d)===pg)){$t('test-message').textContent='Only one Kelly Day per 28-day period.';return;}
-      if(chosen.size>=9){$t('test-message').textContent='Round 1 allows nine Kelly Days.';return;}
-    } else if(chosen.size>=5){$t('test-message').textContent='Select at most five vacation days per round.';return;}
-    chosen.add(iso);render();
-  }
-  // Attach the date to each existing calendar cell without changing its appearance.
-  const previousRender=render;
-  render=function(){
-    previousRender();
-    const from=start+page*28*dayms;
-    const dayCells=[...document.querySelectorAll('#calendar .day')];
-    dayCells.forEach((el,i)=>{el.dataset.iso=dateISO(from+i*dayms)});
-    decorate();
-  };
-  $t('test-clear').onclick=()=>{chosen.clear();render()};
-  window.addEventListener('draft-test-login',()=>{chosen.clear();render()});
-  render();
-})();
+function updateAdminPanel(){
+  const panel=document.getElementById('admin-panel');if(!panel)return;
+  const isAdminLogin=!!sessionToken&&signedInId===2;
+  panel.hidden=!isAdminLogin;
+  document.getElementById('admin-status').textContent=state.status||'unknown';
+  document.getElementById('admin-start').disabled=!isAdminLogin||state.status!=='setup';
+  document.getElementById('admin-pause').disabled=!isAdminLogin||state.status!=='active';
+  document.getElementById('admin-resume').disabled=!isAdminLogin||state.status!=='paused';
+}
+async function adminAction(action){
+  if(!sessionToken||signedInId!==2)return;
+  const messages={start:'START the official 2027 A Shift draft? This will enable KEOUGH to make official Round 1 selections.',pause:'PAUSE the official draft? Firefighters will be unable to submit picks until it resumes.',resume:'RESUME the official draft? The current firefighter will be able to submit picks.'};
+  if(!window.confirm(messages[action]))return;
+  const feedback=document.getElementById('admin-feedback');
+  feedback.textContent='Processing '+action+'…';feedback.className='muted';
+  for(const id of ['admin-start','admin-pause','admin-resume'])document.getElementById(id).disabled=true;
+  try{
+    const response=await fetch(BASE+'/rest/v1/rpc/draft_admin_action',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p_session_token:sessionToken,p_action:action})});
+    const result=await response.json();
+    if(!response.ok||result?.ok!==true)throw Error(result?.message||result?.error||JSON.stringify(result));
+    feedback.textContent='Draft '+result.status+'.';feedback.className='good';
+    selectedDates.clear();await refresh();
+  }catch(err){feedback.textContent='Action failed: '+err.message;feedback.className='error';await refresh()}
+  finally{updateAdminPanel()}
+}
+document.getElementById('admin-start').onclick=()=>adminAction('start');
+document.getElementById('admin-pause').onclick=()=>adminAction('pause');
+document.getElementById('admin-resume').onclick=()=>adminAction('resume');
+</script>
+<script>
+function periodOf(iso){return Math.floor((Date.parse(iso+'T00:00:00Z')-Date.UTC(2026,11,19))/(28*86400000))+1}
+function turnAllowed(){return !!sessionToken && signedInId===state.current_firefighter_id && state.status==='active'}
+function requiredCount(){if(state.round_number===1)return 9;const p=people.find(x=>x.id===signedInId);if(!p)return 0;const used=picks.filter(x=>x.firefighter_id===signedInId&&x.leave_type==='V').length;return Math.min(5,Math.max(0,p.vacation_base+p.vacation_added-used))}
+function canPick(iso){if(!turnAllowed())return 'It is not your turn.';if(iso<'2027-01-01'||iso>'2027-12-31')return 'Only 2027 dates are allowed.';if(((Date.parse(iso+'T00:00:00Z')-Date.UTC(2027,0,16))/86400000)%3!==0)return 'Not an A Shift day.';if(picks.some(x=>x.firefighter_id===signedInId&&x.leave_date===iso))return 'You already selected this day.';if(picks.filter(x=>x.leave_date===iso).length>=2)return 'Two firefighters are already off.';if(state.round_number===1&&[...selectedDates].some(d=>periodOf(d)===periodOf(iso)))return 'Only one Kelly Day per period.';if(selectedDates.size>=requiredCount())return 'You have selected the required number of days.';return null}
+function updatePickPanel(){const allowed=turnAllowed(),needed=requiredCount(),sorted=[...selectedDates].sort();const instructions=document.getElementById('pick-instructions');if(!instructions)return;instructions.textContent=!sessionToken?'Sign in above to prepare your selections.':state.status!=='active'?'The draft is not active. No official picks can be submitted.':!allowed?'You are signed in. Waiting for your turn.':state.round_number===1?'Your turn: select exactly nine 2027 A Shift Kelly Days in nine different periods. Periods 2, 5, 8, and 11 are mandatory.':'Your turn: select exactly '+needed+' A Shift vacation days. The server checks accrual and consecutive-day limits.';document.getElementById('pick-count').textContent=sorted.length+' / '+needed+' dates selected';document.getElementById('pick-dates').textContent=sorted.join(' · ');document.getElementById('submit-picks').disabled=!allowed||sorted.length!==needed;document.querySelectorAll('#calendar .day[data-date]').forEach(el=>{const iso=el.dataset.date;el.classList.toggle('selected',selectedDates.has(iso));el.classList.toggle('available',allowed&&!canPick(iso));});}
+document.getElementById('calendar').addEventListener('click',e=>{const cell=e.target.closest('.day[data-date]');if(!cell)return;const iso=cell.dataset.date,feedback=document.getElementById('pick-feedback');feedback.textContent='';if(selectedDates.has(iso)){selectedDates.delete(iso)}else{const err=canPick(iso);if(err){feedback.textContent=err;feedback.className='error';return}selectedDates.add(iso)}updatePickPanel()});
+document.getElementById('clear-picks').onclick=()=>{selectedDates.clear();document.getElementById('pick-feedback').textContent='';updatePickPanel()};
+document.getElementById('submit-picks').onclick=async()=>{const btn=document.getElementById('submit-picks'),feedback=document.getElementById('pick-feedback');if(!turnAllowed()||selectedDates.size!==requiredCount())return;if(state.round_number===1){const pages=new Set([...selectedDates].map(periodOf));if(![2,5,8,11].every(x=>pages.has(x))){feedback.textContent='Kelly Days must include periods 2, 5, 8, and 11.';feedback.className='error';return}}if(!confirm('Submit these '+selectedDates.size+' dates as your official picks? This cannot be undone by you.'))return;btn.disabled=true;feedback.textContent='Submitting...';try{const response=await fetch(BASE+'/rest/v1/rpc/draft_submit_turn',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p_session_token:sessionToken,p_dates:[...selectedDates].sort(),p_defer_last_kelly:false})});const data=await response.json();if(!response.ok||data?.ok!==true)throw Error(data?.message||data?.error||JSON.stringify(data));selectedDates.clear();feedback.textContent='Your selections were saved successfully.';feedback.className='good';await refresh()}catch(err){feedback.textContent='Not submitted: '+err.message;feedback.className='error'}finally{updatePickPanel()}};
 </script>
 
+<style>
+.correction-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.draft-controls select,.draft-controls input[type=date],.draft-controls textarea{width:100%;margin-top:5px;padding:10px;background:#0d1c30;color:#fff;border:1px solid #60738a;border-radius:7px;font:inherit}.draft-controls label{display:block}.corr-warning{border:1px solid #e5ad43;background:#483719;padding:12px;border-radius:8px;margin:10px 0}.corr-safe{border:1px solid #4ba97e;background:#163e33;padding:12px;border-radius:8px;margin:10px 0}
+</style>
+<script>
+let correctionPreview=null;
+function isCorrectionAdmin(){return !!sessionToken&&signedInId===2}
+function correctionReset(){correctionPreview=null;document.getElementById('corr-save').disabled=true;document.getElementById('corr-result').textContent=''}
+function correctionPeople(){
+ const el=document.getElementById('corr-firefighter');const old=el.value;
+ el.replaceChildren();
+ for(const p of people){const o=document.createElement('option');o.value=String(p.id);o.textContent=p.last_name;el.append(o)}
+ if([...el.options].some(x=>x.value===old))el.value=old;
+ correctionSelections();
+}
+function correctionSelections(){
+ const el=document.getElementById('corr-selection');const old=el.value;
+ el.replaceChildren();
+ const id=Number(document.getElementById('corr-firefighter').value);
+ for(const x of picks.filter(p=>p.firefighter_id===id).sort((a,b)=>a.leave_date.localeCompare(b.leave_date))){
+  const o=document.createElement('option');o.value=String(x.id);o.textContent=`${x.leave_date} — ${x.leave_type==='K'?'Kelly':'Vacation'} (#${x.id})`;el.append(o)
+ }
+ if([...el.options].some(x=>x.value===old))el.value=old;
+ const chosen=picks.find(x=>String(x.id)===el.value);
+ if(chosen){document.getElementById('corr-date').value=chosen.leave_date;document.getElementById('corr-type').value=chosen.leave_type}
+ correctionReset();
+}
+function correctionAction(){const remove=document.getElementById('corr-action').value==='remove';document.getElementById('corr-date-wrap').hidden=remove;document.getElementById('corr-type-wrap').hidden=remove;correctionReset()}
+function correctionPayload(apply=false,override=false){
+ const remove=document.getElementById('corr-action').value==='remove';
+ return {p_session_token:sessionToken,p_selection_id:Number(document.getElementById('corr-selection').value),p_new_date:remove?null:document.getElementById('corr-date').value||null,p_new_type:remove?null:document.getElementById('corr-type').value,p_reason:document.getElementById('corr-reason').value.trim(),p_apply:apply,p_override:override};
+}
+async function correctionRPC(payload){
+ const r=await fetch(BASE+'/rest/v1/rpc/draft_admin_correct',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+ const data=await r.json();if(!r.ok||data?.ok===false)throw Error(data?.message||data?.error||JSON.stringify(data));return data;
+}
+function showCorrectionPreview(data){
+ const box=document.getElementById('corr-result');box.replaceChildren();
+ const heading=document.createElement('strong');heading.textContent=data.requires_override?'⚠️ Rule warnings — override required':'✓ No rule violations detected';
+ const content=document.createElement('div');content.className=data.requires_override?'corr-warning':'corr-safe';content.append(heading);
+ const desc=document.createElement('p');desc.textContent=`${data.firefighter}: ${data.old_date} (${data.old_type}) → ${data.new_date||'REMOVED'}${data.new_type?' ('+data.new_type+')':''}`;content.append(desc);
+ if(data.warnings?.length){const ul=document.createElement('ul');for(const warning of data.warnings){const li=document.createElement('li');li.textContent=warning;ul.append(li)}content.append(ul)}
+ box.append(content);
+}
+async function previewCorrection(){
+ const box=document.getElementById('corr-result');correctionReset();
+ if(!isCorrectionAdmin()||!document.getElementById('corr-selection').value){box.textContent='Choose an existing selection first.';return}
+ const payload=correctionPayload();
+ if(payload.p_reason.length<5){box.textContent='Enter a reason of at least five characters.';return}
+ try{box.textContent='Checking rules…';const result=await correctionRPC(payload);correctionPreview=payload;showCorrectionPreview(result);document.getElementById('corr-save').disabled=false}
+ catch(e){box.textContent='Preview failed: '+e.message}
+}
+async function saveCorrection(){
+ if(!correctionPreview||!isCorrectionAdmin())return;
+ const current=correctionPayload();
+ if(JSON.stringify(current)!==JSON.stringify(correctionPreview)){correctionReset();document.getElementById('corr-result').textContent='Details changed. Preview again before saving.';return}
+ const box=document.getElementById('corr-result');
+ let preview;
+ try{preview=await correctionRPC(current)}catch(e){box.textContent='Recheck failed: '+e.message;return}
+ showCorrectionPreview(preview);
+ const warnings=preview.warnings||[];
+ const message=warnings.length?'ADMINISTRATOR OVERRIDE\n\nThis change breaks the following rules:\n- '+warnings.join('\n- ')+'\n\nSave anyway? The override and reason will be logged.':'Save this administrator correction? The reason will be logged.';
+ if(!window.confirm(message))return;
+ const btn=document.getElementById('corr-save');btn.disabled=true;
+ try{const result=await correctionRPC({...current,p_apply:true,p_override:warnings.length>0});correctionReset();await refresh();box.textContent=result.override?'Override saved and logged.':'Correction saved and logged.'}
+ catch(e){box.textContent='Save failed: '+e.message}
+}
+function updateCorrectionPanel(){
+ const panel=document.getElementById('admin-corrections');if(!panel)return;
+ panel.hidden=!isCorrectionAdmin();
+ if(panel.hidden)return;
+ const select=document.getElementById('corr-firefighter');
+ if(select.options.length!==people.length)correctionPeople();
+ else {
+  const currentIds=[...document.getElementById('corr-selection').options].map(x=>x.value).join(',');
+  const nextIds=picks.filter(x=>x.firefighter_id===Number(select.value)).sort((a,b)=>a.leave_date.localeCompare(b.leave_date)).map(x=>String(x.id)).join(',');
+  if(currentIds!==nextIds)correctionSelections();
+ }
+ document.getElementById('corr-preview').disabled=state.status==='setup'||!document.getElementById('corr-selection').value;
+}
+for(const id of ['corr-date','corr-type','corr-reason'])document.getElementById(id).addEventListener('input',correctionReset);
+document.getElementById('corr-firefighter').addEventListener('change',correctionSelections);
+document.getElementById('corr-selection').addEventListener('change',()=>{const x=picks.find(x=>String(x.id)===document.getElementById('corr-selection').value);if(x){document.getElementById('corr-date').value=x.leave_date;document.getElementById('corr-type').value=x.leave_type}correctionReset()});
+document.getElementById('corr-action').addEventListener('change',correctionAction);
+document.getElementById('corr-preview').addEventListener('click',previewCorrection);
+document.getElementById('corr-save').addEventListener('click',saveCorrection);
+const oldUpdateAdminPanel=updateAdminPanel;
+updateAdminPanel=function(){oldUpdateAdminPanel();updateCorrectionPanel()};
+</script>
 </body></html>
