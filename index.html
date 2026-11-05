@@ -13,7 +13,15 @@
   .calendar-panel .day .date { font-size: 17px; }
   .calendar-panel .pick { font-size: 11px; }
 }
-</style></head><body><header><small>YAUFR • A SHIFT • 2027</small><h1>🏈 VACATION DRAFT HQ 🚒</h1><div class="muted">LIVE DRAFT BOARD • Picks open when the draft starts</div></header><main><section class="stats"><div class="panel"><div class="label">On the clock</div><div class="value" id="picker">Loading…</div></div><div class="panel"><div class="label">Round</div><div class="value" id="round">—</div></div><div class="panel"><div class="label">TIME ON THE CLOCK</div><div class="value" id="clock">00d 00h 00m</div><div class="muted" style="font-size:11px;margin-top:4px">Elapsed time for current firefighter</div></div></section><section id="turn-highlights" class="turn-highlights" aria-live="polite"><div class="panel next-panel"><div class="label">⏭️ Up next</div><div class="value" id="up-next-name">Loading…</div><div class="muted" id="up-next-detail">Next eligible firefighter</div></div><div class="panel your-turn-panel" id="your-turn-banner" hidden><div class="your-turn-title">🏈 IT'S YOUR TURN!</div><div id="your-turn-detail">Choose your dates and submit when ready.</div></div></section><section class="panel" id="draft-extras" aria-live="polite"><div class="draft-announcement" id="draft-announcement"><div class="label">🏈 LIVE DRAFT UPDATE</div><div class="draft-announcement-title" id="pick-announcement-title">Waiting for the first pick</div><div class="muted" id="pick-announcement-detail">The latest completed turn will appear here.</div></div><div class="draft-progress-head"><strong>🏆 DRAFT PROGRESS</strong><span id="draft-progress-count">0 of 0 turns</span></div><div class="draft-progress-track" role="progressbar" aria-label="Draft progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="draft-progress-track"><div id="draft-progress-fill"></div></div><div class="muted" id="draft-progress-percent" style="font-size:12px;margin-top:7px">0% complete</div></section><div class="panel"><div id="notice" class="muted">Connecting to shared draft database…</div><div class="muted" style="font-size:12px">Draft selections are available only on the current firefighter’s turn when the administrator starts the draft. This page refreshes from the database every 10 seconds.</div></div><div class="panel"><h2>Draft board</h2><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Firefighter</th><th>Vacation</th><th>V picked</th><th>K picked</th></tr></thead><tbody id="board"></tbody></table></div></div><div class="panel calendar-panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><button id="prev">◀ Prev</button><div style="text-align:center"><h2 id="period" style="margin:0">Calendar</h2><div class="muted" id="required"></div></div><button id="next">Next ▶</button></div><div class="calendar" id="calendar" style="margin-top:14px"></div></div></main><script>
+</style>
+<style>
+.request-board{max-width:1100px;margin:16px auto;padding:18px;background:#15273d;border:1px solid #314861;border-radius:12px}
+.request-board h2{margin:0 0 8px}.request-board .request-disclaimer{font-size:13px;color:#cbd7e5}
+.request-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0}
+.request-board label{display:block;font-weight:650}.request-board input,.request-board textarea{display:block;width:100%;margin-top:5px;padding:10px;background:#0d1c30;color:white;border:1px solid #60738a;border-radius:7px;font:inherit}
+.request-board button{margin:4px 6px 4px 0}.request-item{border:1px solid #40546b;border-radius:9px;padding:12px;margin-top:10px;background:#1b3047}.request-item.withdrawn{opacity:.7}.request-item p{white-space:pre-wrap;overflow-wrap:anywhere}.request-meta{font-size:12px;color:#bac9d8}.request-status{font-weight:750;color:#f5bd45}.request-pin{border:1px solid #f5bd45;border-radius:5px;background:#4b3a1d;color:#ffdb80;padding:2px 5px;font-size:12px;margin-top:4px;cursor:pointer;max-width:100%;white-space:normal;text-align:left}.request-pin:focus-visible{outline:2px solid white}.request-modal[hidden],#request-form-wrap[hidden],#request-admin[hidden]{display:none}.request-modal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}.request-modal-inner{width:min(520px,100%);max-height:85vh;overflow:auto;background:#15273d;border:2px solid #f5bd45;border-radius:12px;padding:20px}.request-modal-inner p{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head><body><header><small>YAUFR • A SHIFT • 2027</small><h1>🏈 VACATION DRAFT HQ 🚒</h1><div class="muted">LIVE DRAFT BOARD • Picks open when the draft starts</div></header><main><section class="stats"><div class="panel"><div class="label">On the clock</div><div class="value" id="picker">Loading…</div></div><div class="panel"><div class="label">Round</div><div class="value" id="round">—</div></div><div class="panel"><div class="label">TIME ON THE CLOCK</div><div class="value" id="clock">00d 00h 00m</div><div class="muted" style="font-size:11px;margin-top:4px">Elapsed time for current firefighter</div></div></section><section id="turn-highlights" class="turn-highlights" aria-live="polite"><div class="panel next-panel"><div class="label">⏭️ Up next</div><div class="value" id="up-next-name">Loading…</div><div class="muted" id="up-next-detail">Next eligible firefighter</div></div><div class="panel your-turn-panel" id="your-turn-banner" hidden><div class="your-turn-title">🏈 IT'S YOUR TURN!</div><div id="your-turn-detail">Choose your dates and submit when ready.</div></div></section><section class="panel" id="draft-extras" aria-live="polite"><div class="draft-announcement" id="draft-announcement"><div class="label">🏈 LIVE DRAFT UPDATE</div><div class="draft-announcement-title" id="pick-announcement-title">Waiting for the first pick</div><div class="muted" id="pick-announcement-detail">The latest completed turn will appear here.</div></div><div class="draft-progress-head"><strong>🏆 DRAFT PROGRESS</strong><span id="draft-progress-count">0 of 0 turns</span></div><div class="draft-progress-track" role="progressbar" aria-label="Draft progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="draft-progress-track"><div id="draft-progress-fill"></div></div><div class="muted" id="draft-progress-percent" style="font-size:12px;margin-top:7px">0% complete</div></section><div class="panel"><div id="notice" class="muted">Connecting to shared draft database…</div><div class="muted" style="font-size:12px">Draft selections are available only on the current firefighter’s turn when the administrator starts the draft. This page refreshes from the database every 10 seconds.</div></div><div class="panel"><h2>Draft board</h2><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Firefighter</th><th>Vacation</th><th>V picked</th><th>K picked</th></tr></thead><tbody id="board"></tbody></table></div></div><div class="panel calendar-panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><button id="prev">◀ Prev</button><div style="text-align:center"><h2 id="period" style="margin:0">Calendar</h2><div class="muted" id="required"></div></div><button id="next">Next ▶</button></div><div class="calendar" id="calendar" style="margin-top:14px"></div></div></main><script>
 const BASE='https://xhljvicefbxklfbahdby.supabase.co',KEY='sb_publishable_bFun1NtC3uqgXZrTZcSJ8w_MkhVtB31';let people=[],picks=[],state={},page=0;const $=id=>document.getElementById(id);const dayms=86400000;const start=Date.UTC(2026,11,19);let sessionToken=null, signedInId=null, selectedDates=new Set();const dateISO=d=>new Date(d).toISOString().slice(0,10);const fmt=d=>new Date(d).toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'});function shift(d){const n=Math.round((d-Date.UTC(2026,11,20))/dayms);return ['A','B','C'][((Math.floor(n/1)%3)+3)%3]}function shift2(d){const n=Math.round((d-Date.UTC(2026,11,20))/dayms);return ['A','B','C'][((n%3)+3)%3]}function nextEligibleFirefighter(){
   if(state.status==='complete'||state.status==='completed')return null;
   if(!people.length||!state.current_firefighter_id)return null;
@@ -77,7 +85,7 @@ function updateDraftExtras(){
     detail.textContent='The latest completed turn will appear here.';
   }
 }
-function render(){updateTurnHighlights();updateDraftExtras();if(typeof updateAdminPanel==='function')updateAdminPanel();const current=people.find(p=>p.id===state.current_firefighter_id);$('picker').textContent=current?.last_name||'Not started';$('round').textContent=state.round_number ? `Round ${state.round_number} — ${Number(state.round_number)===1?'Kelly Days':'Vacation Days'}` : '—';$('board').innerHTML=people.map(p=>{const mine=picks.filter(x=>x.firefighter_id===p.id);return `<tr class="${p.id===state.current_firefighter_id?'current':''}"><td>${p.id}</td><td>${p.last_name}</td><td>${p.vacation_base+p.vacation_added}</td><td>${mine.filter(x=>x.leave_type==='V').length}</td><td>${mine.filter(x=>x.leave_type==='K').length}</td></tr>`}).join('');const from=start+page*28*dayms,to=from+27*dayms;$('period').textContent=`Period ${page+1} / 14`;$('required').textContent=`${fmt(from)} – ${fmt(to)} · ${[2,5,8,11].includes(page+1)?'Required Kelly period':page+1===14?'Required Kelly period — If not taken on an available 2027 date, a Kelly Day must be taken Jan 1–14, 2028, during next year’s draft':'Optional Kelly period'}`;let html=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="dow">${x}</div>`).join('');const first=new Date(from).getUTCDay();for(let i=0;i<first;i++)html+='<div></div>';for(let i=0;i<28;i++){let d=from+i*dayms,iso=dateISO(d),s=shift2(d),these=picks.filter(x=>x.leave_date===iso);html+=`<div class="day ${s==='A'?'a':'other'} ${selectedDates.has(iso)?'selected':''} ${page===13&&iso>='2028-01-01'?'future-kelly':''}" data-date="${iso}"><div class="date">${new Date(d).getUTCDate()}</div><div class="shift">${s} SHIFT</div>${page===13&&iso>='2028-01-01'?'<div class="future-note">2028 · NEXT DRAFT</div>':''}${these.map(x=>`<div class="pick ${x.leave_type==='K'?'k':''}">${x.leave_type} ${people.find(p=>p.id===x.firefighter_id)?.last_name||'?'}</div>`).join('')}</div>`}$('calendar').innerHTML=html;updatePickPanel();$('prev').disabled=page===0;$('next').disabled=page===13;tick()}function tick(){if(!state.turn_started_at||state.status!=='active'){$('clock').textContent='00d 00h 00m';return}const elapsed=Math.max(0,Math.floor((Date.now()-Date.parse(state.turn_started_at))/60000));const days=Math.floor(elapsed/1440),hours=Math.floor((elapsed%1440)/60),minutes=elapsed%60;$('clock').textContent=`${String(days).padStart(2,'0')}d ${String(hours).padStart(2,'0')}h ${String(minutes).padStart(2,'0')}m`}async function get(table,order){const r=await fetch(`${BASE}/rest/v1/${table}?select=*${order?'&order='+order:''}`,{headers:{apikey:KEY}});if(!r.ok)throw Error(`${table}: ${r.status} ${await r.text()}`);return r.json()}async function refresh(){try{const [a,b,c]=await Promise.all([get('draft_firefighters','id.asc'),get('draft_state'),get('draft_selections','id.asc')]);people=a;state=b[0]||{};picks=c;$('notice').className='muted';$('notice').textContent=`● Connected · ${state.status||'setup'} · ${picks.length} selections · last checked ${new Date().toLocaleTimeString()}`;render()}catch(e){$('notice').className='error';$('notice').textContent=`Unable to read Supabase: ${e.message}`;console.error(e)}}$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};setInterval(tick,1000);setInterval(refresh,10000);refresh();
+function render(){updateTurnHighlights();updateDraftExtras();if(typeof updateAdminPanel==='function')updateAdminPanel();const current=people.find(p=>p.id===state.current_firefighter_id);$('picker').textContent=current?.last_name||'Not started';$('round').textContent=state.round_number ? `Round ${state.round_number} — ${Number(state.round_number)===1?'Kelly Days':'Vacation Days'}` : '—';$('board').innerHTML=people.map(p=>{const mine=picks.filter(x=>x.firefighter_id===p.id);return `<tr class="${p.id===state.current_firefighter_id?'current':''}"><td>${p.id}</td><td>${p.last_name}</td><td>${p.vacation_base+p.vacation_added}</td><td>${mine.filter(x=>x.leave_type==='V').length}</td><td>${mine.filter(x=>x.leave_type==='K').length}</td></tr>`}).join('');const from=start+page*28*dayms,to=from+27*dayms;$('period').textContent=`Period ${page+1} / 14`;$('required').textContent=`${fmt(from)} – ${fmt(to)} · ${[2,5,8,11].includes(page+1)?'Required Kelly period':page+1===14?'Required Kelly period — If not taken on an available 2027 date, a Kelly Day must be taken Jan 1–14, 2028, during next year’s draft':'Optional Kelly period'}`;let html=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="dow">${x}</div>`).join('');const first=new Date(from).getUTCDay();for(let i=0;i<first;i++)html+='<div></div>';for(let i=0;i<28;i++){let d=from+i*dayms,iso=dateISO(d),s=shift2(d),these=picks.filter(x=>x.leave_date===iso);html+=`<div class="day ${s==='A'?'a':'other'} ${selectedDates.has(iso)?'selected':''} ${page===13&&iso>='2028-01-01'?'future-kelly':''}" data-date="${iso}"><div class="date">${new Date(d).getUTCDate()}</div><div class="shift">${s} SHIFT</div>${page===13&&iso>='2028-01-01'?'<div class="future-note">2028 · NEXT DRAFT</div>':''}${these.map(x=>`<div class="pick ${x.leave_type==='K'?'k':''}">${x.leave_type} ${people.find(p=>p.id===x.firefighter_id)?.last_name||'?'}</div>`).join('')}</div>`}$('calendar').innerHTML=html;if(typeof renderRequestPins==='function')renderRequestPins();updatePickPanel();$('prev').disabled=page===0;$('next').disabled=page===13;tick()}function tick(){if(!state.turn_started_at||state.status!=='active'){$('clock').textContent='00d 00h 00m';return}const elapsed=Math.max(0,Math.floor((Date.now()-Date.parse(state.turn_started_at))/60000));const days=Math.floor(elapsed/1440),hours=Math.floor((elapsed%1440)/60),minutes=elapsed%60;$('clock').textContent=`${String(days).padStart(2,'0')}d ${String(hours).padStart(2,'0')}h ${String(minutes).padStart(2,'0')}m`}async function get(table,order){const r=await fetch(`${BASE}/rest/v1/${table}?select=*${order?'&order='+order:''}`,{headers:{apikey:KEY}});if(!r.ok)throw Error(`${table}: ${r.status} ${await r.text()}`);return r.json()}async function refresh(){try{const [a,b,c]=await Promise.all([get('draft_firefighters','id.asc'),get('draft_state'),get('draft_selections','id.asc')]);people=a;state=b[0]||{};picks=c;$('notice').className='muted';$('notice').textContent=`● Connected · ${state.status||'setup'} · ${picks.length} selections · last checked ${new Date().toLocaleTimeString()}`;render()}catch(e){$('notice').className='error';$('notice').textContent=`Unable to read Supabase: ${e.message}`;console.error(e)}}$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};setInterval(tick,1000);setInterval(refresh,10000);refresh();
 </script>
 <style>
 #firefighter-login {
@@ -112,6 +120,16 @@ function render(){updateTurnHighlights();updateDraftExtras();if(typeof updateAdm
 }
 </style>
 
+
+<section class="request-board" id="special-requests" aria-label="Special Date Requests">
+<h2>📌 Special Date Requests</h2>
+<p class="request-disclaimer"><strong>Significant events only:</strong> Weddings, graduations, important family milestones, or other major obligations. This is not a general vacation wish list. Requests are voluntary courtesy notices, <strong>not reservations or priority selections</strong>; normal seniority and draft rules still apply.</p>
+<p id="request-status" class="muted">Loading request board…</p>
+<div id="request-admin" hidden><h3>🔒 Administrator — Request Posting</h3><button type="button" id="request-open">Open Requests</button><button type="button" id="request-close">Close Requests</button><span id="request-admin-feedback" role="status"></span></div>
+<div id="request-form-wrap" hidden><h3>Post an important date</h3><p class="muted">Choose a single day or consecutive date range. Separate nonconsecutive dates require separate requests.</p><form id="request-form"><div class="request-grid"><label>Start date<input type="date" id="request-start" min="2027-01-01" max="2027-12-31" required></label><label>End date<input type="date" id="request-end" min="2027-01-01" max="2027-12-31" required></label></div><label>Why is this date significant?<textarea id="request-reason" rows="3" minlength="10" maxlength="500" required placeholder="Example: My daughter's graduation ceremony"></textarea></label><button type="submit" id="request-submit">Post Request</button><span id="request-form-feedback" role="status"></span></form></div>
+<h3>Requests from A Shift</h3><div id="request-list" aria-live="polite"><p class="muted">Loading…</p></div>
+</section>
+<div class="request-modal" id="request-modal" hidden role="dialog" aria-modal="true" aria-labelledby="request-modal-title"><div class="request-modal-inner"><button type="button" id="request-modal-close" style="float:right">Close ✕</button><h2 id="request-modal-title">📌 Requested date</h2><div id="request-modal-content"></div></div></div>
 <section id="firefighter-login">
   <h2>🔐 Firefighter Sign In</h2>
   <p>Sign in with your private code. Picks are only available during your turn.</p>
@@ -190,7 +208,7 @@ function render(){updateTurnHighlights();updateDraftExtras();if(typeof updateAdm
         if (!response.ok) throw new Error('Sign-in service error');
 
         if (Array.isArray(data) && data[0]?.session_token) {
-          sessionToken=data[0].session_token; signedInId=Number(select.value); selectedDates.clear(); updatePickPanel(); render(); result.textContent='Signed in as '+select.options[select.selectedIndex].text+'.'; updateAdminPanel();
+          sessionToken=data[0].session_token; signedInId=Number(select.value); selectedDates.clear(); updatePickPanel(); render(); if(typeof updateRequestUI==='function')updateRequestUI(); result.textContent='Signed in as '+select.options[select.selectedIndex].text+'.'; updateAdminPanel();
         } else {
           result.textContent =
             'Sign-in unsuccessful. Check your code or try again later.';
@@ -277,7 +295,7 @@ function turnAllowed(){return !!sessionToken && signedInId===state.current_firef
 function requiredCount(){if(state.round_number===1)return 9;const p=people.find(x=>x.id===signedInId);if(!p)return 0;const used=picks.filter(x=>x.firefighter_id===signedInId&&x.leave_type==='V').length;return Math.min(5,Math.max(0,p.vacation_base+p.vacation_added-used))}
 function canPick(iso){if(!turnAllowed())return 'It is not your turn.';if(iso<'2027-01-01'||iso>'2027-12-31')return 'Only 2027 dates are allowed.';if(((Date.parse(iso+'T00:00:00Z')-Date.UTC(2027,0,16))/86400000)%3!==0)return 'Not an A Shift day.';if(picks.some(x=>x.firefighter_id===signedInId&&x.leave_date===iso))return 'You already selected this day.';if(picks.filter(x=>x.leave_date===iso).length>=2)return 'Two firefighters are already off.';if(state.round_number===1&&[...selectedDates].some(d=>periodOf(d)===periodOf(iso)))return 'Only one Kelly Day per period.';if(selectedDates.size>=requiredCount())return 'You have selected the required number of days.';return null}
 function updatePickPanel(){const allowed=turnAllowed(),needed=requiredCount(),sorted=[...selectedDates].sort();const instructions=document.getElementById('pick-instructions');if(!instructions)return;instructions.textContent=!sessionToken?'Sign in above to prepare your selections.':state.status!=='active'?'The draft is not active. No official picks can be submitted.':!allowed?'You are signed in. Waiting for your turn.':state.round_number===1?'Your turn: select exactly nine 2027 A Shift Kelly Days in nine different periods. Periods 2, 5, 8, and 11 are mandatory.':'Your turn: select exactly '+needed+' A Shift vacation days. The server checks accrual and consecutive-day limits.';document.getElementById('pick-count').textContent=sorted.length+' / '+needed+' dates selected';document.getElementById('pick-dates').textContent=sorted.join(' · ');document.getElementById('submit-picks').disabled=!allowed||sorted.length!==needed;document.querySelectorAll('#calendar .day[data-date]').forEach(el=>{const iso=el.dataset.date;el.classList.toggle('selected',selectedDates.has(iso));el.classList.toggle('available',allowed&&!canPick(iso));});}
-document.getElementById('calendar').addEventListener('click',e=>{const cell=e.target.closest('.day[data-date]');if(!cell)return;const iso=cell.dataset.date,feedback=document.getElementById('pick-feedback');feedback.textContent='';if(selectedDates.has(iso)){selectedDates.delete(iso)}else{const err=canPick(iso);if(err){feedback.textContent=err;feedback.className='error';return}selectedDates.add(iso)}updatePickPanel()});
+document.getElementById('calendar').addEventListener('click',e=>{if(e.target.closest('.request-pin'))return;const cell=e.target.closest('.day[data-date]');if(!cell)return;const iso=cell.dataset.date,feedback=document.getElementById('pick-feedback');feedback.textContent='';if(selectedDates.has(iso)){selectedDates.delete(iso)}else{const err=canPick(iso);if(err){feedback.textContent=err;feedback.className='error';return}selectedDates.add(iso)}updatePickPanel()});
 document.getElementById('clear-picks').onclick=()=>{selectedDates.clear();document.getElementById('pick-feedback').textContent='';updatePickPanel()};
 document.getElementById('submit-picks').onclick=async()=>{const btn=document.getElementById('submit-picks'),feedback=document.getElementById('pick-feedback');if(!turnAllowed()||selectedDates.size!==requiredCount())return;if(state.round_number===1){const pages=new Set([...selectedDates].map(periodOf));if(![2,5,8,11].every(x=>pages.has(x))){feedback.textContent='Kelly Days must include periods 2, 5, 8, and 11.';feedback.className='error';return}}if(!confirm('Submit these '+selectedDates.size+' dates as your official picks? This cannot be undone by you.'))return;btn.disabled=true;feedback.textContent='Submitting...';try{const response=await fetch(BASE+'/rest/v1/rpc/draft_submit_turn',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p_session_token:sessionToken,p_dates:[...selectedDates].sort(),p_defer_last_kelly:false})});const data=await response.json();if(!response.ok||data?.ok!==true)throw Error(data?.message||data?.error||JSON.stringify(data));selectedDates.clear();feedback.textContent='Your selections were saved successfully.';feedback.className='good';await refresh()}catch(err){feedback.textContent='Not submitted: '+err.message;feedback.className='error'}finally{updatePickPanel()}};
 </script>
@@ -369,5 +387,96 @@ document.getElementById('corr-preview').addEventListener('click',previewCorrecti
 document.getElementById('corr-save').addEventListener('click',saveCorrection);
 const oldUpdateAdminPanel=updateAdminPanel;
 updateAdminPanel=function(){oldUpdateAdminPanel();updateCorrectionPanel()};
+</script>
+
+<script>
+// Special Date Requests are independent of the vacation draft submission flow.
+let specialRequests=[],requestPostingOpen=false,requestLoadError=false;
+const requestEl=id=>document.getElementById(id);
+const requestHeaders={apikey:KEY,'Content-Type':'application/json'};
+const requestDateLabel=iso=>new Date(iso+'T12:00:00Z').toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'});
+const requestName=id=>people.find(p=>Number(p.id)===Number(id))?.last_name||'Firefighter';
+async function requestRpc(name,payload){
+  const r=await fetch(BASE+'/rest/v1/rpc/'+name,{method:'POST',headers:requestHeaders,body:JSON.stringify(payload)});
+  const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{data={message:raw}}
+  if(!r.ok||data?.ok!==true)throw Error(data?.message||data?.error||'Request action failed');return data;
+}
+async function loadSpecialRequests(){
+ try{
+  const [a,b]=await Promise.all([
+   fetch(BASE+'/rest/v1/draft_special_requests?select=*&order=created_at.desc',{headers:{apikey:KEY}}),
+   fetch(BASE+'/rest/v1/draft_request_settings?select=posting_open&id=eq.1',{headers:{apikey:KEY}})
+  ]);
+  if(!a.ok||!b.ok)throw Error('Could not load request data');
+  specialRequests=await a.json();const settings=await b.json();requestPostingOpen=settings[0]?.posting_open===true;requestLoadError=false;
+  updateRequestUI();renderRequestPins();
+ }catch(err){requestLoadError=true;requestEl('request-status').textContent='Unable to load special requests: '+err.message;console.error(err)}
+}
+function updateRequestUI(){
+ const isAdmin=!!sessionToken&&signedInId===2;
+ requestEl('request-admin').hidden=!isAdmin;
+ requestEl('request-form-wrap').hidden=!sessionToken||!requestPostingOpen||requestLoadError;
+ requestEl('request-status').textContent=requestLoadError?'Requests unavailable':requestPostingOpen?'🟢 Posting OPEN — signed-in firefighters may submit requests.':'🔒 Posting CLOSED — requests remain visible and owners may withdraw.';
+ requestEl('request-open').disabled=requestPostingOpen||requestLoadError;
+ requestEl('request-close').disabled=!requestPostingOpen||requestLoadError;
+ const list=requestEl('request-list');list.replaceChildren();
+ const activeRequests=specialRequests.filter(r=>r.status==='active');
+ if(!activeRequests.length){const p=document.createElement('p');p.className='muted';p.textContent='No special date requests have been posted yet.';list.append(p);return}
+ for(const r of activeRequests){
+  const item=document.createElement('article');item.className='request-item';
+  const heading=document.createElement('strong');heading.textContent='📌 '+requestName(r.firefighter_id)+' — '+requestDateLabel(r.start_date)+(r.end_date!==r.start_date?' to '+requestDateLabel(r.end_date):'');item.append(heading);
+  const reason=document.createElement('p');reason.textContent=r.reason;item.append(reason);
+  const meta=document.createElement('div');meta.className='request-meta';meta.textContent='ACTIVE · Posted '+new Date(r.created_at).toLocaleString();item.append(meta);
+  if(sessionToken&&Number(signedInId)===Number(r.firefighter_id)&&r.status==='active'){
+   const btn=document.createElement('button');btn.type='button';btn.textContent='Withdraw my request';btn.addEventListener('click',async()=>{
+    if(!confirm('Withdraw this request? It will disappear from the public board and calendar, but remain recorded in Supabase.'))return;
+    btn.disabled=true;try{await requestRpc('draft_request_withdraw',{p_session_token:sessionToken,p_request_id:r.id});await loadSpecialRequests()}catch(e){alert('Withdrawal failed: '+e.message);btn.disabled=false}
+   });item.append(btn);
+  }
+  list.append(item);
+ }
+}
+function renderRequestPins(){
+ const calendar=requestEl('calendar');if(!calendar)return;
+ calendar.querySelectorAll('.request-pin').forEach(el=>el.remove());
+ for(const cell of calendar.querySelectorAll('.day[data-date]')){
+  const iso=cell.dataset.date;
+  const matching=specialRequests.filter(r=>r.status==='active'&&r.start_date<=iso&&r.end_date>=iso);
+  if(!matching.length)continue;
+  const pin=document.createElement('button');pin.type='button';pin.className='request-pin';pin.textContent='📌 '+matching.length+' request'+(matching.length===1?'':'s');pin.setAttribute('aria-label','View '+matching.length+' special date request(s) for '+requestDateLabel(iso));
+  pin.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openRequestModal(iso,matching)});
+  cell.append(pin);
+ }
+}
+function openRequestModal(iso,matching){
+ requestEl('request-modal-title').textContent='📌 '+requestDateLabel(iso);
+ const content=requestEl('request-modal-content');content.replaceChildren();
+ for(const r of matching){const block=document.createElement('div');block.className='request-item';const h=document.createElement('strong');h.textContent=requestName(r.firefighter_id)+' — '+requestDateLabel(r.start_date)+(r.end_date!==r.start_date?' to '+requestDateLabel(r.end_date):'');const p=document.createElement('p');p.textContent=r.reason;block.append(h,p);content.append(block)}
+ requestEl('request-modal').hidden=false;requestEl('request-modal-close').focus();
+}
+requestEl('request-modal-close').addEventListener('click',()=>requestEl('request-modal').hidden=true);
+requestEl('request-modal').addEventListener('click',e=>{if(e.target===requestEl('request-modal'))requestEl('request-modal').hidden=true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')requestEl('request-modal').hidden=true});
+requestEl('request-form').addEventListener('submit',async e=>{
+ e.preventDefault();const feedback=requestEl('request-form-feedback'),btn=requestEl('request-submit');
+ const from=requestEl('request-start').value,to=requestEl('request-end').value,reason=requestEl('request-reason').value.trim();
+ if(!sessionToken||!requestPostingOpen)return;
+ if(!from||!to||to<from){feedback.textContent='End date must be on or after start date.';return}
+ if(!confirm('Post this significant date request for everyone to see?'))return;
+ btn.disabled=true;feedback.textContent='Posting…';
+ try{await requestRpc('draft_request_post',{p_session_token:sessionToken,p_start_date:from,p_end_date:to,p_reason:reason});requestEl('request-form').reset();feedback.textContent='Request posted successfully.';await loadSpecialRequests()}
+ catch(err){feedback.textContent='Not posted: '+err.message}finally{btn.disabled=false}
+});
+for(const [id,open] of [['request-open',true],['request-close',false]]){
+ requestEl(id).addEventListener('click',async()=>{
+  if(!sessionToken||signedInId!==2)return;
+  if(!confirm((open?'OPEN':'CLOSE')+' Special Date Requests posting? This does not change the vacation draft.'))return;
+  const feedback=requestEl('request-admin-feedback');feedback.textContent='Saving…';
+  requestEl('request-open').disabled=requestEl('request-close').disabled=true;
+  try{await requestRpc('draft_request_admin_toggle',{p_session_token:sessionToken,p_posting_open:open});feedback.textContent=open?'Posting opened.':'Posting closed.';await loadSpecialRequests()}
+  catch(e){feedback.textContent='Could not update: '+e.message;updateRequestUI()}
+ });
+}
+loadSpecialRequests();setInterval(loadSpecialRequests,10000);
 </script>
 </body></html>
