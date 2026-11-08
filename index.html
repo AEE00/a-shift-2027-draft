@@ -446,7 +446,7 @@ function updateRequestUI(){
 function renderRequestPins(){
  const calendar=requestEl('calendar');if(!calendar)return;
  calendar.querySelectorAll('.request-pin').forEach(el=>el.remove());
- for(const cell of calendar.querySelectorAll('.day[data-date]')){
+ for(const cell of calendar.querySelectorAll('.day.a[data-date]')){
   const iso=cell.dataset.date;
   const matching=specialRequests.filter(r=>r.status==='active'&&r.start_date<=iso&&r.end_date>=iso);
   if(!matching.length)continue;
